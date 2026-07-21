@@ -27,8 +27,9 @@ graph TD
     
     subgraph Async Workers
         Worker[Judge & AI Worker (Python)]
-        RabbitMQ -.->|Consume Task| Worker
     end
+    
+    RabbitMQ -.->|Consume Task| Worker
     
     subgraph Private AI Server GPU
         vLLM[vLLM Inference]
