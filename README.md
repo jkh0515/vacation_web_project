@@ -20,14 +20,14 @@
 
 ```mermaid
 graph TD
-    User([User / Frontend]) -->|1. Submit Code & Image| API(FastAPI Backend)
+    User([User / Frontend]) -->|1. Submit Code & Image| API(Spring Boot Backend)
     API -->|2. Upload Image| MinIO[(MinIO Storage)]
     API -->|3. Save Submission| DB[(PostgreSQL)]
-    API -.->|4. Push Task| RedisQueue[(Redis / ARQ)]
+    API -.->|4. Push Task| RabbitMQ[(RabbitMQ Message Broker)]
     
     subgraph Async Workers
-        Worker[Judge & AI Worker]
-        RedisQueue -.->|Pop Task| Worker
+        Worker[Judge & AI Worker (Python)]
+        RabbitMQ -.->|Consume Task| Worker
     end
     
     subgraph Private AI Server GPU
@@ -43,7 +43,7 @@ graph TD
     Result --> Worker
     Worker -->|8. Request Review| vLLM
     
-    Worker -->|9. Update Status| DB
+    Worker -->|9. Update Status| API
     Worker -.->|10. Publish Event| RedisPubSub[(Redis Pub/Sub)]
     RedisPubSub -.-> API
     API -->|11. SSE Stream| User
@@ -64,8 +64,8 @@ graph TD
 
 ### 4.1. 기술 스택 (Tech Stack)
 - **Frontend**: React, Next.js, TailwindCSS
-- **Backend API**: Python FastAPI, SQLAlchemy (asyncpg)
-- **Message Broker / Cache**: Redis, ARQ (비동기 작업 큐)
+- **Backend API**: Java 17, Spring Boot, Spring Data JPA, Spring WebFlux (SSE)
+- **Message Broker / Cache**: RabbitMQ (채점 비동기 큐), Redis (SSE 상태 브로드캐스팅)
 - **Database / Storage**: PostgreSQL, MinIO (S3 호환)
 - **Sandbox / DevOps**: Python Docker SDK, Docker Compose, Prometheus & Grafana (모니터링)
 - **AI Server**: vLLM (Continuous Batching), QLoRA, PaddleOCR
@@ -73,8 +73,8 @@ graph TD
 ### 4.2. 핵심 엔지니어링 주안점 (Engineering Highlights)
 - **🛡️ 완벽한 샌드박스 보안 (Security Hardening)**: 
   악의적인 코드(Fork Bomb 등)로부터 호스트를 보호하기 위해 채점 컨테이너 실행 시 `--network none`, `--memory 256m`, `--pids-limit 64`, `--cap-drop=ALL` (리눅스 커널 권한 완전 회수) 옵션을 엄격하게 적용.
-- **⚡ 비동기 논블로킹 I/O 분산 처리**: 
-  빠른 웹 응답(FastAPI)과 느린 AI 연산/채점(Worker)을 메세지 큐로 완벽히 분리. DB 병목을 막기 위해 `asyncpg` 기반 비동기 커넥션 풀링 사용.
+- **⚡ 이기종 언어(Polyglot) 간 비동기 분산 처리**: 
+  Spring Boot(Java)의 안정적인 웹 응답 처리와 Python(AI/Worker)의 무거운 연산을 `RabbitMQ`를 통한 메시징으로 완벽히 분리하여 트래픽 병목을 방지.
 - **👁️ 인프라 관측성 (Observability)**: 
   작업 큐 적재량, AI 서버 GPU 리소스, 채점 엔진 병목을 실시간 모니터링하기 위해 Prometheus와 Grafana 도입.
 
@@ -96,7 +96,7 @@ graph TD
 ├── docker-compose.yml        # 전체 마이크로서비스 오케스트레이션 정의
 ├── monitoring/               # Prometheus, Grafana 설정 파일
 ├── frontend/                 # Next.js 프론트엔드
-├── backend_api/              # FastAPI 메인 웹 서버
+├── backend_api/              # Spring Boot 메인 웹 서버 (Java)
 ├── judge_worker/             # 커스텀 샌드박스 채점 엔진 (ARQ Worker)
 │   └── runners/              # 격리 채점용 Base Docker 이미지 (C++, Python)
 └── ai_server/                # GPU 가속 AI 추론 서버

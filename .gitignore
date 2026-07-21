@@ -50,3 +50,25 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Java / Spring Boot / Gradle
+.gradle/
+backend_api/build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+### IntelliJ IDEA ###
+out/
+*.ipr
+*.iws
+*.iml
+*.log
+
