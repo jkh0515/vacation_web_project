@@ -26,7 +26,7 @@ graph TD
     API -.->|4. Push Task| RabbitMQ[(RabbitMQ Message Broker)]
     
     subgraph Async Workers
-        Worker[Judge & AI Worker (Python)]
+        Worker["Judge & AI Worker (Python)"]
     end
     
     RabbitMQ -.->|Consume Task| Worker
