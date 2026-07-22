@@ -98,7 +98,7 @@ graph TD
 ├── monitoring/               # Prometheus, Grafana 설정 파일
 ├── frontend/                 # Next.js 프론트엔드
 ├── backend_api/              # Spring Boot 메인 웹 서버 (Java)
-├── judge_worker/             # 커스텀 샌드박스 채점 엔진 (ARQ Worker)
+├── judge_worker/             # 커스텀 샌드박스 채점 엔진 (RabbitMQ Worker)
 │   └── runners/              # 격리 채점용 Base Docker 이미지 (C++, Python)
 └── ai_server/                # GPU 가속 AI 추론 서버
 ```
