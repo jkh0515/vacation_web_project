@@ -14,6 +14,18 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
+  ai_server:
+    build:
+      context: ./ai_server
+    container_name: judge_ai_server
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
     container_name: judge_redis
@@ -50,8 +62,25 @@ services:
       - rabbitmqdata:/var/lib/rabbitmq
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: judge_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollamadata:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
 volumes:
   pgdata:
   redisdata:
   miniodata:
   rabbitmqdata:
+  ollamadata:

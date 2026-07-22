@@ -61,6 +61,7 @@ public class SubmissionService implements MessageListener {
                 submission.getCode(),
                 submission.getLanguage(),
                 "10 10\n", // mock input data for now
+                "20",      // mock expected output for now
                 2
         );
 

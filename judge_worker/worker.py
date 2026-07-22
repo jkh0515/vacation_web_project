@@ -20,7 +20,7 @@ try:
 except Exception as e:
     print(f"Failed to connect to Redis: {e}")
 
-def run_judge(submission_id: int, code: str, language: str, input_data: str = "", timeout: int = 2):
+def run_judge(submission_id: int, code: str, language: str, input_data: str = "", expected_output: str = "", timeout: int = 2):
     print(f"Judging submission {submission_id} in {language}...")
     
     if language.lower() != "python":
@@ -58,8 +58,16 @@ def run_judge(submission_id: int, code: str, language: str, input_data: str = ""
             stdout = container.logs(stdout=True, stderr=False).decode('utf-8')
             stderr = container.logs(stdout=False, stderr=True).decode('utf-8')
             
-            status = "success" if exit_code == 0 else "error"
-            output = stdout if exit_code == 0 else stderr
+            if exit_code != 0:
+                status = "ERROR"
+                output = stderr
+            else:
+                output = stdout
+                # Check if it matches expected answer
+                if expected_output and output.strip() == expected_output.strip():
+                    status = "SUCCESS"
+                else:
+                    status = "FAIL"
         except Exception as wait_err:
             container.kill()
             status = "timeout"
@@ -89,10 +97,11 @@ def callback(ch, method, properties, body):
         code = data.get("code")
         language = data.get("language", "python")
         input_data = data.get("input_data", "")
+        expected_output = data.get("expected_output", "")
         timeout = data.get("timeout", 2)
         
         # Run judge logic synchronously
-        result = run_judge(submission_id, code, language, input_data, timeout)
+        result = run_judge(submission_id, code, language, input_data, expected_output, timeout)
         
         # Publish result to Redis
         redis_client.publish('judge_events', json.dumps(result))

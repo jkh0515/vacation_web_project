@@ -14,5 +14,6 @@ public class SubmissionMessageDto {
     private String code;
     private String language;
     private String input_data;
+    private String expected_output;
     private int timeout;
 }
