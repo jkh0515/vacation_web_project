@@ -25,7 +25,7 @@ export default function SignupPage() {
       });
 
       if (!response.ok) {
-        throw new Error('?뚯썝媛?낆뿉 ?ㅽ뙣?덉뒿?덈떎. (?대찓???먮뒗 ?됰꽕??以묐났)');
+        throw new Error('회원가입에 실패했습니다. (이메일 또는 닉네임 중복)');
       }
 
       const data = await response.json();

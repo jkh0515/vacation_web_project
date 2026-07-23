@@ -24,7 +24,7 @@ export default function LoginPage() {
       });
 
       if (!response.ok) {
-        throw new Error('?대찓???먮뒗 鍮꾨?踰덊샇媛 ?щ컮瑜댁? ?딆뒿?덈떎.');
+        throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
       }
 
       const data = await response.json();
@@ -87,7 +87,7 @@ export default function LoginPage() {
         </form>
 
         <div className="text-center text-sm text-slate-400">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <button onClick={() => router.push('/signup')} className="text-blue-400 hover:text-blue-300 font-medium">
             Sign up
           </button>
