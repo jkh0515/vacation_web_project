@@ -18,14 +18,14 @@ export default function SignupPage() {
     setError('');
 
     try {
-      const response = await fetch(${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/auth/signup', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, username, password }),
       });
 
       if (!response.ok) {
-        throw new Error('?�원가?�에 ?�패?�습?�다. (?�메???�는 ?�네??중복)');
+        throw new Error('?뚯썝媛?낆뿉 ?ㅽ뙣?덉뒿?덈떎. (?대찓???먮뒗 ?됰꽕??以묐났)');
       }
 
       const data = await response.json();
@@ -85,7 +85,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
-              placeholder="?�••••••�?
+              placeholder="비밀번호"
             />
           </div>
           <button 

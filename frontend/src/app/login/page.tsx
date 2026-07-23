@@ -17,14 +17,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch(${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/auth/login', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
-        throw new Error('?�메???�는 비�?번호가 ?�바르�? ?�습?�다.');
+        throw new Error('?대찓???먮뒗 鍮꾨?踰덊샇媛 ?щ컮瑜댁? ?딆뒿?덈떎.');
       }
 
       const data = await response.json();
@@ -73,7 +73,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
-              placeholder="?�••••••�?
+              placeholder="비밀번호"
             />
           </div>
           <button 

@@ -24,7 +24,7 @@ export default function DashboardPage() {
     // Fetch submissions
     const fetchSubmissions = async () => {
       try {
-        const response = await fetch(${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/users/me/submissions', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/users/me/submissions`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
