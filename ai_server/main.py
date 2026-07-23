@@ -31,13 +31,19 @@ class HintRequest(BaseModel):
     problem_text: str
     failed_code: str
 
-def call_ollama(prompt: str) -> str:
+class TestcaseRequest(BaseModel):
+    problem_text: str
+
+def call_ollama(prompt: str, format_json: bool = False) -> str:
     """Helper function to call local Ollama API."""
     payload = {
         "model": MODEL_NAME,
         "prompt": prompt,
         "stream": False
     }
+    if format_json:
+        payload["format"] = "json"
+        
     try:
         response = requests.post(OLLAMA_URL, json=payload)
         response.raise_for_status()
@@ -96,6 +102,41 @@ async def process_problem(file: UploadFile = File(...)):
     finally:
         if os.path.exists(temp_img_path):
             os.remove(temp_img_path)
+
+@app.post("/api/ai/testcase")
+async def generate_testcase(request: TestcaseRequest):
+    """
+    Analyzes problem text and generates exactly 1 edge test case in JSON format.
+    """
+    prompt = f"""
+당신은 엄격한 알고리즘 저지(Judge) 시스템의 테스트 케이스 생성기입니다.
+다음 문제 설명을 읽고, 가장 까다로운 엣지 케이스(Edge Case) 1개를 생성하세요.
+
+문제 내용:
+{request.problem_text}
+
+반드시 아래 JSON 형식으로만 답변하세요. 다른 설명이나 마크다운은 절대 포함하지 마세요.
+{{
+  "input": "여기에 입력값을 문자열로 작성",
+  "expected_output": "여기에 기대되는 출력값을 문자열로 작성"
+}}
+"""
+    response = call_ollama(prompt, format_json=True)
+    try:
+        # Validate that it is actually parsable JSON
+        parsed = json.loads(response)
+        return parsed
+    except json.JSONDecodeError:
+        # Fallback if the model didn't return perfect JSON
+        import re
+        match = re.search(r'\{.*\}', response, re.DOTALL)
+        if match:
+            try:
+                parsed = json.loads(match.group(0))
+                return parsed
+            except:
+                pass
+        raise HTTPException(status_code=500, detail="Failed to parse AI generated testcase.")
 
 @app.post("/api/ai/hint")
 async def get_hint(request: HintRequest):

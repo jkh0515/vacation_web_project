@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class SubmissionRequestDto {
     private Long userId;
-    private Long problemId;
+    private String problemText;
     private String code;
     private String language;
 }

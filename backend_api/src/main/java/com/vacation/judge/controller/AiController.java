@@ -10,6 +10,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.core.io.Resource;
@@ -24,6 +25,9 @@ public class AiController {
     private final AiService aiService;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${app.ai-server.url}")
+    private String aiServerBaseUrl;
+
     @PostMapping("/process-problem")
     public ResponseEntity<?> processProblem(@RequestParam("file") MultipartFile file) {
         try {
@@ -35,7 +39,7 @@ public class AiController {
             
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             
-            String aiServerUrl = "http://localhost:8000/api/ai/process-problem";
+            String aiServerUrl = aiServerBaseUrl + "/process-problem";
             ResponseEntity<Map> response = restTemplate.postForEntity(aiServerUrl, requestEntity, Map.class);
             
             return ResponseEntity.ok(response.getBody());

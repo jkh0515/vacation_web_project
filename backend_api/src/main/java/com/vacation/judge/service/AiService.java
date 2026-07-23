@@ -1,6 +1,7 @@
 package com.vacation.judge.service;
 
 import com.vacation.judge.dto.AiHintRequestDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,8 @@ import java.util.HashMap;
 
 @Service
 public class AiService {
-    private final String AI_SERVER_URL = "http://localhost:8000/api/ai";
+    @Value("${app.ai-server.url}")
+    private String AI_SERVER_URL;
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String getHint(AiHintRequestDto request) {

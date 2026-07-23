@@ -3,9 +3,9 @@ spring:
     name: judge
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/judge_db
-    username: admin
-    password: secret
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/judge_db}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -18,18 +18,27 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
     listener:
       simple:
         acknowledge-mode: manual
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
 
 server:
   port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:VmFjYXRpb25KWRnZVNlY3JldEtleUZvckp3dEF1dGhlbnRpY2F0aW9uV2l0aFNwcmluZ1NlY3VyaXR5}
+  expiration_time: 86400000 # 24 hours in ms
+
+app:
+  ai-server:
+    url: ${AI_SERVER_URL:http://localhost:8000/api/ai}

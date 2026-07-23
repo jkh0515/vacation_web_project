@@ -18,9 +18,8 @@ public class Submission {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id")
-    private Problem problem;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String problemText;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String code;
@@ -34,9 +33,9 @@ public class Submission {
     @Column(columnDefinition = "TEXT")
     private String resultOutput;
 
-    public Submission(User user, Problem problem, String code, String language) {
+    public Submission(User user, String problemText, String code, String language) {
         this.user = user;
-        this.problem = problem;
+        this.problemText = problemText;
         this.code = code;
         this.language = language;
         this.status = "PENDING";

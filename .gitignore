@@ -1,6 +1,7 @@
 # Environments (Security)
 .env
 .env.*
+!.env.example
 .venv/
 venv/
 env/

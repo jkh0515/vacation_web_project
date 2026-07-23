@@ -34,6 +34,8 @@ public class SubmissionService implements MessageListener {
 
     private final SubmissionRepository submissionRepository;
     private final UserRepository userRepository;
+    @Value("${app.ai-server.url}")
+    private String aiServerUrl;
     private final ProblemRepository problemRepository;
     private final RabbitTemplate rabbitTemplate;
     private final RedisMessageListenerContainer redisMessageListenerContainer;
@@ -50,18 +52,33 @@ public class SubmissionService implements MessageListener {
     public Long submitCode(SubmissionRequestDto requestDto) {
         User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        Problem problem = problemRepository.findById(requestDto.getProblemId())
-                .orElseThrow(() -> new IllegalArgumentException("Problem not found"));
 
-        Submission submission = new Submission(user, problem, requestDto.getCode(), requestDto.getLanguage());
+        Submission submission = new Submission(user, requestDto.getProblemText(), requestDto.getCode(), requestDto.getLanguage());
         submissionRepository.save(submission);
+
+        // Call AI Server to generate testcase
+        String aiInput = "10 10\n";
+        String aiExpected = "20";
+        try {
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            Map<String, String> aiRequest = Map.of("problem_text", requestDto.getProblemText());
+            JsonNode response = restTemplate.postForObject(aiServerUrl + "/testcase", aiRequest, JsonNode.class);
+            if (response != null && response.has("input") && response.has("expected_output")) {
+                aiInput = response.get("input").asText();
+                aiExpected = response.get("expected_output").asText();
+                if (!aiInput.endsWith("\n")) aiInput += "\n";
+                log.info("AI generated testcase: input={}, expected={}", aiInput, aiExpected);
+            }
+        } catch (Exception e) {
+            log.error("Failed to generate testcase from AI server, using fallback", e);
+        }
 
         SubmissionMessageDto messageDto = new SubmissionMessageDto(
                 submission.getId(),
                 submission.getCode(),
                 submission.getLanguage(),
-                "10 10\n", // mock input data for now
-                "20",      // mock expected output for now
+                aiInput,
+                aiExpected,
                 2
         );
 
@@ -81,6 +98,24 @@ public class SubmissionService implements MessageListener {
 
         try {
             emitter.send(SseEmitter.event().name("connect").data("Connected to submission " + submissionId));
+            
+            // Check if submission is already processed to prevent race condition
+            submissionRepository.findById(submissionId).ifPresent(submission -> {
+                if (submission.getStatus() != null && !submission.getStatus().equals("PENDING") && !submission.getStatus().equals("READY")) {
+                    try {
+                        String body = objectMapper.writeValueAsString(Map.of(
+                                "submission_id", submission.getId(),
+                                "status", submission.getStatus(),
+                                "output", submission.getResultOutput() != null ? submission.getResultOutput() : ""
+                        ));
+                        emitter.send(SseEmitter.event().name("judge_result").data(body));
+                        emitter.complete();
+                    } catch (IOException e) {
+                        log.error("Failed to send immediate result", e);
+                    }
+                }
+            });
+            
         } catch (IOException e) {
             emitters.remove(submissionId);
         }
