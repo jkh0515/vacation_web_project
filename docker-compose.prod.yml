@@ -2,8 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    build:
-      context: ./backend_api
+    image: ${DOCKERHUB_USERNAME}/judge-backend:latest
     container_name: judge_backend
     ports:
       - "8080:8080"
@@ -23,8 +22,7 @@ services:
     restart: always
 
   worker:
-    build:
-      context: ./judge_worker
+    image: ${DOCKERHUB_USERNAME}/judge-worker:latest
     container_name: judge_worker
     environment:
       - RABBITMQ_HOST=${RABBITMQ_HOST}
