@@ -18,8 +18,9 @@ try:
     redis_host = os.environ.get('REDIS_HOST', 'localhost')
     redis_port = int(os.environ.get('REDIS_PORT', 6379))
     redis_password = os.environ.get('REDIS_PASSWORD', None)
+    redis_ssl = os.environ.get('REDIS_SSL', 'false').lower() == 'true'
     
-    redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_password, db=0, decode_responses=True)
+    redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_password, db=0, decode_responses=True, ssl=redis_ssl)
     redis_client.ping()
     print(f"Successfully connected to Redis at {redis_host}.")
 except Exception as e:
@@ -125,11 +126,12 @@ def main():
     rabbitmq_port = int(os.environ.get('RABBITMQ_PORT', 5672))
     rabbitmq_user = os.environ.get('RABBITMQ_USERNAME', 'guest')
     rabbitmq_pass = os.environ.get('RABBITMQ_PASSWORD', 'guest')
+    rabbitmq_vhost = os.environ.get('RABBITMQ_VHOST', '/')
     
     credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_pass)
     
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port, credentials=credentials)
+        pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port, credentials=credentials, virtual_host=rabbitmq_vhost)
     )
     channel = connection.channel()
     
