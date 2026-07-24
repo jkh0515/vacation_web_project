@@ -3,6 +3,7 @@ import time
 import docker
 import pika
 import redis
+import os
 
 # Initialize Docker client
 try:
@@ -14,9 +15,13 @@ except Exception as e:
 
 # Initialize Redis client for SSE broadcasting
 try:
-    redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_host = os.environ.get('REDIS_HOST', 'localhost')
+    redis_port = int(os.environ.get('REDIS_PORT', 6379))
+    redis_password = os.environ.get('REDIS_PASSWORD', None)
+    
+    redis_client = redis.Redis(host=redis_host, port=redis_port, password=redis_password, db=0, decode_responses=True)
     redis_client.ping()
-    print("Successfully connected to Redis.")
+    print(f"Successfully connected to Redis at {redis_host}.")
 except Exception as e:
     print(f"Failed to connect to Redis: {e}")
 
@@ -116,8 +121,15 @@ def callback(ch, method, properties, body):
 def main():
     # Connect to RabbitMQ
     # Retry mechanism could be added here for production readiness
+    rabbitmq_host = os.environ.get('RABBITMQ_HOST', 'localhost')
+    rabbitmq_port = int(os.environ.get('RABBITMQ_PORT', 5672))
+    rabbitmq_user = os.environ.get('RABBITMQ_USERNAME', 'guest')
+    rabbitmq_pass = os.environ.get('RABBITMQ_PASSWORD', 'guest')
+    
+    credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_pass)
+    
     connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='localhost', port=5672)
+        pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port, credentials=credentials)
     )
     channel = connection.channel()
     
