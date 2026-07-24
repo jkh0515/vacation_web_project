@@ -46,4 +46,5 @@ jobs:
             cd ~/judge-app
             git pull origin main
             docker-compose -f docker-compose.prod.yml pull
+            docker rm -f judge_backend judge_worker || true
             docker-compose -f docker-compose.prod.yml up -d
