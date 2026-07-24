@@ -24,7 +24,7 @@ export default function JudgePage() {
     } else {
       setUser(JSON.parse(userData));
       // Fetch latest submission
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/users/me/submissions/latest`, {
+      fetch(`/api/users/me/submissions/latest`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
         .then(res => res.json())
@@ -95,7 +95,7 @@ export default function JudgePage() {
       const submissionId = data.submission_id;
       setOutput(prev => prev + `Submission successful! (ID: ${submissionId})\nConnecting to real-time stream...\n`);
 
-      const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/submissions/${submissionId}/stream`);
+      const eventSource = new EventSource(`/api/submissions/${submissionId}/stream`);
 
       eventSource.addEventListener('connect', (e) => {
         setOutput(prev => prev + `[Connected] ${e.data}\nWaiting for worker...\n`);
@@ -136,7 +136,7 @@ export default function JudgePage() {
     const token = localStorage.getItem('token');
     setOutput(prev => prev + '\n[🤖 AI] 분석 중... (시간이 조금 걸릴 수 있습니다)\n');
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/ai/hint`, {
+      const response = await fetch(`/api/ai/hint`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
