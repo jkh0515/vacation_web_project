@@ -73,7 +73,7 @@ export default function JudgePage() {
     setOutput('Submitting to Judge Server...\n');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/submissions`, {
+      const response = await fetch(`/api/submissions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
